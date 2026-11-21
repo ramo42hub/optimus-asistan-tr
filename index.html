@@ -2,8 +2,14 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#050612" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Optimus Asistan" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./icon-180.png" />
   <title>OPTIMUS PRIME TR // GÜNLÜK KOMUTA ASİSTANI</title>
   <style>
     * {
@@ -482,6 +488,7 @@
     <button id="autobotBtn" class="task-btn" type="button" style="background:rgba(2,132,199,0.25);border:1px solid rgba(56,189,248,0.55);color:#e0f2fe;">🛡 Autobot Çağrısı</button>
     <button id="soundTestBtn" class="task-btn" type="button" style="background:rgba(234,179,8,0.22);border:1px solid rgba(250,204,21,0.55);color:#fef9c3;">🔊 Ses Testi</button>
     <button id="micBtn" class="task-btn" type="button" style="background:rgba(14,165,233,0.28);border:1px solid #38bdf8;color:#ffffff;">🎤 Mikrofonu Aç</button>
+    <button id="installBtn" class="task-btn" type="button" style="display:none;background:rgba(34,197,94,0.22);border:1px solid rgba(74,222,128,0.55);color:#dcfce7;">📲 Uygulamayı Kur</button>
   </div>
 
   <script>
@@ -495,6 +502,7 @@
     const timerBtn = document.getElementById("timerBtn");
     const autobotBtn = document.getElementById("autobotBtn");
     const soundTestBtn = document.getElementById("soundTestBtn");
+    const installBtn = document.getElementById("installBtn");
     const statusBadge = document.getElementById("statusBadge");
     const primeSvg = document.getElementById("primeSvg");
     const faceTriangle = document.getElementById("faceTriangle");
@@ -507,6 +515,7 @@
     let timerTimeout = null;
     let timerInterval = null;
     let timerEndAt = null;
+    let installPrompt = null;
 
     function loadNotes() {
       try {
@@ -879,6 +888,40 @@
       handleCommand(cmdInput.value);
       cmdInput.value = "";
     });
+
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      installPrompt = event;
+      installBtn.style.display = "inline-block";
+    });
+
+    installBtn.addEventListener("click", async () => {
+      if (installPrompt) {
+        installPrompt.prompt();
+        await installPrompt.userChoice;
+        installPrompt = null;
+        installBtn.style.display = "none";
+      } else if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
+        speakPrime("Paylaş düğmesine dokunup Ana Ekrana Ekle seçeneğini kullan.");
+      }
+    });
+
+    window.addEventListener("appinstalled", () => {
+      installBtn.style.display = "none";
+      speakPrime("Optimus Asistan ana ekrana kuruldu.");
+    });
+
+    if (/iphone|ipad|ipod/i.test(navigator.userAgent) &&
+        !window.navigator.standalone &&
+        !window.matchMedia("(display-mode: standalone)").matches) {
+      installBtn.style.display = "inline-block";
+    }
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch(() => {});
+      });
+    }
   </script>
 </body>
 </html>
