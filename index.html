@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#050612" />
+  <title>OPTIMUS PRIME TR // GÜNLÜK KOMUTA ASİSTANI</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      width: 100%;
+      background:
+        radial-gradient(circle at 26% 48%, rgba(139, 92, 246, 0.24) 0%, rgba(56, 189, 248, 0.11) 40%, #050612 82%);
+      color: #e2e8f0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 20px 56px 20px;
+      gap: 24px;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      overflow-x: hidden;
+    }
+
+    .left-panel {
+      flex: 1 1 390px;
+      max-width: 470px;
+      min-height: 480px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, rgba(10, 12, 31, 0.96) 0%, rgba(5, 6, 18, 0.99) 100%);
+      border: 1px solid rgba(168, 85, 247, 0.42);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 0 40px rgba(109, 40, 217, 0.22);
+    }
+
+    @keyframes idleFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-4px); }
+    }
+
+    #primeSvg {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      animation: idleFloat 4.2s ease-in-out infinite;
+      transition: transform 0.25s ease, filter 0.25s ease;
+      filter: drop-shadow(0 0 16px rgba(139, 92, 246, 0.5));
+    }
+
+    #primeSvg.active {
+      animation: none;
+      transform: scale(1.03);
+      filter: drop-shadow(0 0 30px rgba(56, 189, 248, 0.85));
+    }
+
+    .right-panel {
+      flex: 1 1 440px;
+      max-width: 680px;
+      height: 76vh;
+      min-height: 460px;
+      background-color: #181924;
+      border: 1px solid rgba(168, 85, 247, 0.45);
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .titlebar {
+      background-color: #1f202e;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #2a2d42;
+      font-size: 12px;
+      color: #cbd5e1;
+    }
+
+    .dots {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .run-btn {
+      background-color: #0284c7;
+      color: #ffffff;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .run-btn:hover {
+      background-color: #0369a1;
+    }
+
+    .run-btn.listening {
+      background-color: #dc2626;
+    }
+
+    .editor {
+      flex: 1;
+      padding: 14px 16px;
+      background-color: #14151f;
+      color: #cbd5e1;
+      font-family: Consolas, Monaco, "Courier New", monospace;
+      font-size: 12.5px;
+      line-height: 1.55;
+      overflow-y: auto;
+      border-bottom: 1px solid #2a2d42;
+    }
+
+    .terminal {
+      height: 46%;
+      background-color: #0d0e17;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      font-family: Consolas, Monaco, "Courier New", monospace;
+      font-size: 12.5px;
+    }
+
+    .term-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #1e2235;
+      padding-bottom: 6px;
+      margin-bottom: 8px;
+      font-size: 11px;
+      color: #94a3b8;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    .term-logs {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding-right: 4px;
+    }
+
+    .log-sys { color: #38bdf8; }
+    .log-user { color: #4ade80; }
+    .log-bot { color: #fcd34d; }
+
+    .cmd-form {
+      margin-top: 8px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .cmd-input {
+      flex: 1;
+      background-color: #161826;
+      color: #f8fafc;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      padding: 7px 10px;
+      font-size: 12px;
+      outline: none;
+    }
+
+    .cmd-input:focus {
+      border-color: #38bdf8;
+    }
+
+    .send-btn {
+      background-color: #9333ea;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .send-btn:hover {
+      background-color: #7e22ce;
+    }
+
+    .taskbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 40px;
+      background-color: rgba(9, 11, 26, 0.96);
+      border-top: 1px solid rgba(168, 85, 247, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 0 12px;
+      font-size: 12px;
+      z-index: 30;
+    }
+
+    .task-btn {
+      padding: 4px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 12px;
+      min-height: 28px;
+    }
+
+    .task-btn:focus-visible,
+    .run-btn:focus-visible,
+    .send-btn:focus-visible,
+    .cmd-input:focus-visible {
+      outline: 2px solid #e0f2fe;
+      outline-offset: 2px;
+    }
+
+    @media (max-width: 980px) {
+      body {
+        align-items: flex-start;
+        height: auto;
+        min-height: 100vh;
+        padding: 12px 12px 64px;
+      }
+
+      .left-panel {
+        max-width: 320px;
+        min-height: 300px;
+        flex-basis: 280px;
+      }
+
+      #primeSvg {
+        max-height: 340px;
+      }
+
+      .right-panel {
+        height: 66vh;
+        min-height: 430px;
+        flex-basis: 420px;
+      }
+    }
+
+    @media (max-width: 680px) {
+      body {
+        display: block;
+        padding: 8px 8px 92px;
+      }
+
+      .left-panel,
+      .right-panel {
+        max-width: none;
+        width: 100%;
+      }
+
+      .left-panel {
+        min-height: 220px;
+        height: 260px;
+        margin-bottom: 12px;
+        padding: 4px;
+      }
+
+      #primeSvg {
+        height: 250px;
+        max-height: 250px;
+      }
+
+      .right-panel {
+        height: 520px;
+        min-height: 520px;
+      }
+
+      .taskbar {
+        height: 76px;
+        flex-wrap: wrap;
+        align-content: center;
+        gap: 6px;
+      }
+
+      .taskbar > span {
+        width: 100%;
+        text-align: center;
+      }
+
+      .task-btn {
+        padding: 4px 7px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="left-panel">
+    <svg id="primeSvg" width="380" height="580" viewBox="0 0 500 740" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="purpleArmor" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#a855f7" />
+          <stop offset="55%" stop-color="#7e22ce" />
+          <stop offset="100%" stop-color="#4c1d95" />
+        </linearGradient>
+        <linearGradient id="darkPlate" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#141836" />
+          <stop offset="100%" stop-color="#060713" />
+        </linearGradient>
+        <linearGradient id="maskSteel" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#1e293b" />
+          <stop offset="100%" stop-color="#0f172a" />
+        </linearGradient>
+      </defs>
+
+      <!-- Siber-Geometrik Çevre Çizgileri & Noktalar -->
+      <g fill="none" stroke-linecap="square">
+        <line x1="274" y1="34" x2="298" y2="58" stroke="#a855f7" stroke-width="1.6" />
+        <line x1="284" y1="30" x2="308" y2="54" stroke="#a855f7" stroke-width="1.6" />
+        <line x1="294" y1="26" x2="318" y2="50" stroke="#38bdf8" stroke-width="1.6" />
+
+        <polyline points="175,86 154,107 154,168" stroke="#a855f7" stroke-width="1.4" />
+        <polyline points="118,165 96,187 96,268 78,286" stroke="#38bdf8" stroke-width="1.5" />
+        <polyline points="382,165 404,187 404,268 422,286" stroke="#a855f7" stroke-width="1.5" />
+        <polyline points="82,350 108,376 108,512 134,538" stroke="#38bdf8" stroke-width="1.8" />
+        <polyline points="418,350 392,376 392,512 366,538" stroke="#a855f7" stroke-width="1.8" />
+
+        <polyline points="354,445 376,467 376,585 304,635 304,658 286,658" stroke="#38bdf8" stroke-width="3.2" />
+      </g>
+
+      <g fill="#38bdf8">
+        <rect x="112" y="192" width="4" height="4" />
+        <rect x="112" y="203" width="4" height="4" />
+        <rect x="112" y="214" width="4" height="4" />
+        <rect x="384" y="192" width="4" height="4" />
+        <rect x="384" y="203" width="4" height="4" />
+        <rect x="384" y="214" width="4" height="4" />
+        <rect x="98" y="305" width="5" height="5" />
+        <rect x="98" y="317" width="5" height="5" />
+        <rect x="397" y="305" width="5" height="5" />
+        <rect x="397" y="317" width="5" height="5" />
+        <rect x="292" y="666" width="5" height="5" />
+        <rect x="302" y="666" width="5" height="5" />
+        <rect x="312" y="666" width="5" height="5" />
+      </g>
+
+      <!-- Sol ve Sağ Sivri Yan Kule / Kanat Yapıları -->
+      <polygon points="168,74 128,255 170,255" fill="url(#purpleArmor)" stroke="#c084fc" stroke-width="2" />
+      <polygon points="152,134 136,242 160,242" fill="#080b1d" stroke="#38bdf8" stroke-width="1.4" />
+      <g stroke="#060713" stroke-width="2.2">
+        <line x1="140" y1="194" x2="168" y2="200" />
+        <line x1="138" y1="205" x2="168" y2="211" />
+        <line x1="136" y1="216" x2="168" y2="222" />
+        <line x1="134" y1="227" x2="168" y2="233" />
+      </g>
+
+      <polygon points="332,74 372,255 330,255" fill="url(#purpleArmor)" stroke="#c084fc" stroke-width="2" />
+      <polygon points="344,132 394,108 376,225 332,225" fill="#6d28d9" fill-opacity="0.72" stroke="#c084fc" stroke-width="1.8" />
+      <g fill="#38bdf8">
+        <polygon points="344,182 374,193 374,199 344,188" />
+        <polygon points="344,194 374,205 374,211 344,200" />
+        <polygon points="344,206 374,217 374,223 344,212" />
+      </g>
+
+      <!-- BELİRGİN GÖZLER & YÜZ HATLARI -->
+      <g id="primeExpression">
+        <path d="M212 146 C212 80, 288 80, 288 146 L282 278 L250 314 L218 278 Z" fill="url(#darkPlate)" stroke="#c084fc" stroke-width="2.8" />
+
+        <line x1="244" y1="96" x2="244" y2="110" stroke="#c084fc" stroke-width="1.8" />
+        <line x1="250" y1="94" x2="250" y2="110" stroke="#38bdf8" stroke-width="1.8" />
+        <line x1="256" y1="96" x2="256" y2="110" stroke="#c084fc" stroke-width="1.8" />
+
+        <line x1="204" y1="150" x2="204" y2="276" stroke="#38bdf8" stroke-width="3.2" />
+        <line x1="296" y1="150" x2="296" y2="276" stroke="#38bdf8" stroke-width="3.2" />
+
+        <polygon id="faceTriangle" points="250,120 277,166 223,166" fill="#071229" stroke="#38bdf8" stroke-width="5.2" stroke-linejoin="round" />
+        <polygon points="250,134 264,158 236,158" fill="#050714" stroke="#bae6fd" stroke-width="1.6" stroke-linejoin="round" />
+
+        <polygon points="218,180 282,180 274,234 250,254 226,234" fill="#0b102b" stroke="#c084fc" stroke-width="2.4" />
+
+        <polygon id="visorLeft" points="222,188 246,196 243,210 221,203" fill="#38bdf8" stroke="#ffffff" stroke-width="1.6" />
+        <polygon id="visorRight" points="278,188 254,196 257,210 279,203" fill="#38bdf8" stroke="#ffffff" stroke-width="1.6" />
+
+        <line x1="250" y1="184" x2="250" y2="236" stroke="#38bdf8" stroke-width="2.4" />
+        <polyline points="222,212 238,225 238,252" fill="none" stroke="#c084fc" stroke-width="2.2" />
+        <polyline points="278,212 262,225 262,252" fill="none" stroke="#c084fc" stroke-width="2.2" />
+
+        <polygon points="232,228 268,228 263,286 250,306 237,286" fill="url(#maskSteel)" stroke="#38bdf8" stroke-width="2.6" />
+        <line x1="250" y1="228" x2="250" y2="302" stroke="#38bdf8" stroke-width="2.4" />
+        <polyline points="235,243 246,251 246,258 236,252" fill="none" stroke="#e9d5ff" stroke-width="1.8" />
+        <polyline points="265,243 254,251 254,258 264,252" fill="none" stroke="#e9d5ff" stroke-width="1.8" />
+        <polyline points="237,264 250,273 263,264" fill="none" stroke="#38bdf8" stroke-width="2" />
+        <polyline points="239,278 250,287 261,278" fill="none" stroke="#c084fc" stroke-width="1.8" />
+        <line x1="244" y1="294" x2="256" y2="294" stroke="#38bdf8" stroke-width="1.8" />
+      </g>
+
+      <!-- Göğüs & Zırh Gövdesi -->
+      <polygon points="134,326 192,326 250,368 308,326 366,326 382,394 350,532 272,562 228,562 150,532 118,394" fill="url(#darkPlate)" stroke="#a855f7" stroke-width="2.8" />
+      <polygon points="154,378 238,410 234,504 164,480" fill="#1d4ed8" fill-opacity="0.52" stroke="#c084fc" stroke-width="2.4" />
+      <polygon points="346,378 262,410 266,504 336,480" fill="#1d4ed8" fill-opacity="0.52" stroke="#c084fc" stroke-width="2.4" />
+
+      <polyline points="152,362 250,404 348,362" fill="none" stroke="#38bdf8" stroke-width="3.4" />
+      <polyline points="174,344 250,382 326,344" fill="none" stroke="#c084fc" stroke-width="2.4" />
+
+      <polygon points="236,412 264,412 268,508 232,508" fill="#17193b" stroke="#a855f7" stroke-width="2.2" />
+      <rect x="228" y="512" width="44" height="44" rx="3" fill="#2e2a78" stroke="#c084fc" stroke-width="2.2" />
+
+      <!-- Alt Autobot Amblemi -->
+      <g transform="translate(220, 586)">
+        <polygon points="30,2 48,11 58,6 54,30 45,50 30,58 15,50 6,30 2,6 12,11" fill="url(#purpleArmor)" stroke="#d8b4fe" stroke-width="2.4" />
+        <polygon points="30,7 37,20 30,25 23,20" fill="#f3e8ff" />
+        <polygon points="12,23 25,27 23,32 12,28" fill="#e9d5ff" />
+        <polygon points="48,23 35,27 37,32 48,28" fill="#e9d5ff" />
+        <polygon points="24,36 36,36 34,52 30,55 26,52" fill="#c084fc" />
+      </g>
+
+      <text x="250" y="692" text-anchor="middle" fill="#38bdf8" font-size="16" font-family="monospace" font-weight="bold" letter-spacing="5">
+        PRIME // AUTOBOT
+      </text>
+    </svg>
+  </div>
+
+  <div class="right-panel">
+    <div class="titlebar">
+      <div class="dots">
+        <span class="dot" style="background:#ff5f56;"></span>
+        <span class="dot" style="background:#ffbd2e;"></span>
+        <span class="dot" style="background:#27c93f;"></span>
+        <span style="margin-left:8px;font-family:monospace;color:#e2e8f0;">optimus_asistan.html - AUTOBOT</span>
+      </div>
+      <button id="runBtn" class="run-btn" type="button" aria-label="Sesli komutu başlat veya durdur">▶ Çalıştır / Dinle</button>
+    </div>
+
+    <div class="editor">
+      <div style="color:#4ade80;"># Optimus Prime Günlük Komuta Asistanı Komutları</div>
+      <div><span style="color:#c084fc;">saat</span> / <span style="color:#c084fc;">tarih</span> / <span style="color:#c084fc;">günlük özet</span></div>
+      <div><span style="color:#c084fc;">not al [metin]</span> → Kalıcı not kaydeder</div>
+      <div><span style="color:#c084fc;">notlarım</span> / <span style="color:#c084fc;">not sil 1</span> / <span style="color:#c084fc;">notları sil</span></div>
+      <div><span style="color:#c084fc;">sayaç 15 dakika</span> / <span style="color:#c084fc;">sayacı iptal et</span></div>
+      <div><span style="color:#c084fc;">hesapla 48 * 12</span> / <span style="color:#c084fc;">autobot</span></div>
+    </div>
+
+    <div class="terminal">
+      <div class="term-header">
+        <div style="display:flex;gap:14px;">
+          <span>PROBLEMLER</span>
+          <span>ÇIKTI</span>
+          <span style="color:#38bdf8;border-bottom:1px solid #38bdf8;padding-bottom:3px;">⌘ TERMİNAL</span>
+        </div>
+        <div id="statusBadge" style="color:#c084fc;"></div>
+      </div>
+
+      <div id="termLogs" class="term-logs">
+        <div class="log-sys">PS C:\AUTOBOTS&gt; python optimus_asistan.py --gunluk</div>
+        <div class="log-sys">GÜNLÜK ASİSTAN AKTİF [TR-TR | NOT &amp; SAYAÇ HAZIR]</div>
+      </div>
+
+      <form id="cmdForm" class="cmd-form">
+        <input id="cmdInput" class="cmd-input" type="text" autocomplete="off" aria-label="Asistan komutu" placeholder='Örn: "sayaç 10 dakika", "not al rapor hazırla", "notlarım", "günlük özet"...' />
+        <button class="send-btn" type="submit" aria-label="Komutu gönder">➤ Gönder</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="taskbar">
+    <span style="color:#d8b4fe;font-weight:700;letter-spacing:1.5px;">OPTIMUS PRIME TR</span>
+    <button id="greetBtn" class="task-btn" type="button" style="background:rgba(147,51,234,0.25);border:1px solid rgba(192,132,252,0.55);color:#f3e8ff;">Günlük Özet</button>
+    <button id="timerBtn" class="task-btn" type="button" style="background:rgba(16,185,129,0.22);border:1px solid rgba(52,211,153,0.55);color:#d1fae5;">⏱ 25dk Odak</button>
+    <button id="autobotBtn" class="task-btn" type="button" style="background:rgba(2,132,199,0.25);border:1px solid rgba(56,189,248,0.55);color:#e0f2fe;">🛡 Autobot Çağrısı</button>
+    <button id="micBtn" class="task-btn" type="button" style="background:rgba(14,165,233,0.28);border:1px solid #38bdf8;color:#ffffff;">🎤 Mikrofonu Aç</button>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "optimus_prime_daily_notes_v1";
+    const termLogs = document.getElementById("termLogs");
+    const cmdForm = document.getElementById("cmdForm");
+    const cmdInput = document.getElementById("cmdInput");
+    const runBtn = document.getElementById("runBtn");
+    const micBtn = document.getElementById("micBtn");
+    const greetBtn = document.getElementById("greetBtn");
+    const timerBtn = document.getElementById("timerBtn");
+    const autobotBtn = document.getElementById("autobotBtn");
+    const statusBadge = document.getElementById("statusBadge");
+    const primeSvg = document.getElementById("primeSvg");
+    const faceTriangle = document.getElementById("faceTriangle");
+    const visorLeft = document.getElementById("visorLeft");
+    const visorRight = document.getElementById("visorRight");
+
+    let isListening = false;
+    let audioCtx = null;
+    let droneOsc = null;
+    let timerTimeout = null;
+    let timerInterval = null;
+    let timerEndAt = null;
+
+    function loadNotes() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveNotes(notes) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+        return true;
+      } catch (e) {}
+      return false;
+    }
+
+    function addLog(cls, text) {
+      const div = document.createElement("div");
+      div.className = "log-" + cls;
+      div.textContent = text;
+      termLogs.appendChild(div);
+      termLogs.scrollTop = termLogs.scrollHeight;
+    }
+
+    function setActiveVisual(active) {
+      primeSvg.classList.toggle("active", active);
+      faceTriangle.setAttribute("stroke", active ? "#ffffff" : "#38bdf8");
+      visorLeft.setAttribute("fill", active ? "#ffffff" : "#38bdf8");
+      visorRight.setAttribute("fill", active ? "#ffffff" : "#38bdf8");
+    }
+
+    function stopBass() {
+      if (droneOsc) {
+        try {
+          const { osc, gain, ctx } = droneOsc;
+          gain.gain.setValueAtTime(gain.gain.value, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.12);
+          osc.stop(ctx.currentTime + 0.15);
+        } catch (e) {}
+        droneOsc = null;
+      }
+    }
+
+    function startBass() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        if (!audioCtx) audioCtx = new AudioContext();
+        if (audioCtx.state === "suspended") audioCtx.resume();
+        stopBass();
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(55, audioCtx.currentTime);
+
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(140, audioCtx.currentTime);
+
+        gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.045, audioCtx.currentTime + 0.15);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        droneOsc = { osc, gain, ctx: audioCtx };
+      } catch (e) {}
+    }
+
+    function getTurkishVoice() {
+      if (!("speechSynthesis" in window)) return null;
+      const voices = window.speechSynthesis.getVoices();
+      const trVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith("tr"));
+      if (!trVoices.length) return null;
+      return trVoices.find(v => /tolga|mehmet|ahmet|male|erkek|google/i.test(v.name)) || trVoices[0];
+    }
+
+    function speakPrime(text) {
+      addLog("bot", "OPTIMUS PRIME: " + text);
+      if (!("speechSynthesis" in window)) return;
+      try {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = "tr-TR";
+        utter.pitch = 0.38;
+        utter.rate = 0.86;
+        utter.volume = 1.0;
+
+        const voice = getTurkishVoice();
+        if (voice) utter.voice = voice;
+
+        utter.onstart = () => {
+          statusBadge.textContent = "🔊 Konuşuyor";
+          setActiveVisual(true);
+          startBass();
+        };
+        utter.onend = utter.onerror = () => {
+          statusBadge.textContent = timerEndAt ? getRemainingBadge() : "";
+          setActiveVisual(false);
+          stopBass();
+        };
+
+        window.speechSynthesis.speak(utter);
+      } catch (e) {}
+    }
+
+    function getRemainingBadge() {
+      if (!timerEndAt) return "";
+      const remSec = Math.max(0, Math.ceil((timerEndAt - Date.now()) / 1000));
+      const m = Math.floor(remSec / 60);
+      const s = remSec % 60;
+      return `⏱ ${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    }
+
+    function clearTimer(announce) {
+      if (timerTimeout) clearTimeout(timerTimeout);
+      if (timerInterval) clearInterval(timerInterval);
+      timerTimeout = null;
+      timerInterval = null;
+      timerEndAt = null;
+      statusBadge.textContent = "";
+      if (announce) speakPrime("Aktif sayaç iptal edildi.");
+    }
+
+    function startTimerMinutes(minutes) {
+      const mins = Number(minutes);
+      if (!Number.isFinite(mins) || mins <= 0) {
+        speakPrime("Geçerli bir dakika değeri belirtmelisin. Örneğin: sayaç 15 dakika.");
+        return;
+      }
+      clearTimer(false);
+      timerEndAt = Date.now() + mins * 60 * 1000;
+      statusBadge.textContent = getRemainingBadge();
+
+      timerInterval = setInterval(() => {
+        if (!timerEndAt) return;
+        statusBadge.textContent = getRemainingBadge();
+      }, 1000);
+
+      timerTimeout = setTimeout(() => {
+        clearTimer(false);
+        speakPrime(`${mins} dakikalık süre doldu. Yeni göreve geçebiliriz.`);
+      }, mins * 60 * 1000);
+
+      speakPrime(`${mins} dakikalık sayaç başlatıldı.`);
+    }
+
+    function dailyBriefing() {
+      const now = new Date();
+      const hour = now.getHours();
+      let vakit = "İyi günler";
+      if (hour < 12) vakit = "Günaydın";
+      else if (hour >= 18) vakit = "İyi akşamlar";
+
+      const timeStr = now.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
+      const dateStr = now.toLocaleDateString("tr-TR", { day: "numeric", month: "long", weekday: "long" });
+      const notes = loadNotes();
+      const noteInfo = notes.length > 0
+        ? `Kayıtlı ${notes.length} notun bulunuyor.`
+        : "Kayıtlı notun bulunmuyor.";
+      const timerInfo = timerEndAt ? ` Aktif sayaç ${getRemainingBadge().replace("⏱ ", "")} kaldı.` : "";
+
+      speakPrime(`${vakit}. Bugün ${dateStr}, saat ${timeStr}. ${noteInfo}${timerInfo} Yeni görev için hazırım.`);
+    }
+
+    function triggerAutobotCall() {
+      speakPrime("Ben Optimus Prime. Özgürlük, her canlı varlığın hakkıdır. Autobotlar, göreve hazırız.");
+    }
+
+    function tryMath(expr) {
+      const cleaned = expr
+        .replace(/^hesapla\s+/i, "")
+        .replace(/çarpı/gi, "*")
+        .replace(/bölü/gi, "/")
+        .replace(/artı/gi, "+")
+        .replace(/eksi/gi, "-")
+        .replace(/,/g, ".")
+        .trim();
+
+      if (!/^[0-9+\-*/().\s]+$/.test(cleaned) || !/[+\-*/]/.test(cleaned)) {
+        return null;
+      }
+      try {
+        const result = Function(`"use strict"; return (${cleaned});`)();
+        if (typeof result === "number" && Number.isFinite(result)) {
+          return Number.isInteger(result) ? String(result) : result.toFixed(2).replace(".", ",");
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    function handleCommand(raw) {
+      const clean = raw.trim();
+      if (!clean) return;
+      const lower = clean.toLowerCase();
+      addLog("user", "Siz dediniz: " + clean);
+
+      if (lower.startsWith("not al ")) {
+        const noteText = clean.slice(7).trim();
+        if (!noteText) {
+          speakPrime("Kaydetmek istediğin notu belirtmedin.");
+          return;
+        }
+        const notes = loadNotes();
+        notes.push(noteText);
+        if (saveNotes(notes)) {
+          speakPrime(`Not kaydedildi: ${noteText}.`);
+        } else {
+          speakPrime("Not kaydedilemedi. Tarayıcı depolama alanına ulaşılamıyor.");
+        }
+      } else if (lower === "notları sil" || lower === "tüm notları sil" || lower === "notları temizle" || lower === "not sil") {
+        const notes = loadNotes();
+        if (notes.length === 0) {
+          speakPrime("Silinecek kayıtlı not bulunmuyor.");
+        } else if (saveNotes([])) {
+          speakPrime("Tüm kayıtlı notlar temizlendi.");
+        } else {
+          speakPrime("Notlar temizlenemedi. Tarayıcı depolama alanına ulaşılamıyor.");
+        }
+      } else if (/^not\s+sil\s+(\d+)$/i.test(clean)) {
+        const idx = Number(clean.match(/^not\s+sil\s+(\d+)$/i)[1]) - 1;
+        const notes = loadNotes();
+        if (idx < 0 || idx >= notes.length) {
+          speakPrime("Bu numarada kayıtlı bir not bulunamadı.");
+          return;
+        }
+        const removed = notes.splice(idx, 1)[0];
+        saveNotes(notes);
+        speakPrime(`"${removed}" notu silindi.`);
+      } else if (lower.includes("notlarım") || lower.includes("notlar") || lower.includes("hatırlatıcı")) {
+        const notes = loadNotes();
+        if (!notes.length) {
+          speakPrime("Şu an kayıtlı hiçbir notun yok.");
+        } else {
+          const formatted = notes.map((n, i) => `${i + 1}: ${n}`).join(", ");
+          speakPrime(`Kayıtlı notların: ${formatted}.`);
+        }
+      } else if (lower.includes("sayacı iptal") || lower.includes("sayaç iptal") || lower.includes("zamanlayıcı iptal")) {
+        clearTimer(true);
+      } else if (/^(sayaç|zamanlayıcı)\s+(\d+(?:[.,]\d+)?)/i.test(clean)) {
+        const match = clean.match(/^(sayaç|zamanlayıcı)\s+(\d+(?:[.,]\d+)?)/i);
+        const mins = parseFloat(match[2].replace(",", "."));
+        startTimerMinutes(mins);
+      } else if (lower.includes("özet") || lower.includes("durum") || lower.includes("merhaba") || lower.includes("selam") || lower.includes("nasılsın")) {
+        dailyBriefing();
+      } else if (lower.includes("saat")) {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
+        speakPrime(`Şu an saat ${timeStr}. Zamanımız değerli.`);
+      } else if (lower.includes("tarih") || lower.includes("bugün") || lower.includes("günlerden")) {
+        const now = new Date();
+        const dateStr = now.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric", weekday: "long" });
+        speakPrime(`Bugün ${dateStr}. Yeni bir gün, yeni bir görev.`);
+      } else if (lower.includes("autobot") || lower.includes("optimus") || lower.includes("prime") || lower.includes("çağrı")) {
+        triggerAutobotCall();
+      } else {
+        const mathAns = tryMath(lower);
+        if (mathAns !== null) {
+          speakPrime(`İşlemin sonucu ${mathAns}.`);
+        } else {
+          speakPrime(`"${clean}" komutunu aldım. Saat, tarih, günlük özet, not al, sayaç veya hesapla komutlarını kullanabilirsin.`);
+        }
+      }
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.lang = "tr-TR";
+      recognition.interimResults = false;
+
+      recognition.onstart = () => {
+        isListening = true;
+        runBtn.textContent = "■ Dinleniyor...";
+        runBtn.classList.add("listening");
+        micBtn.textContent = "⏹ Dinlemeyi Durdur";
+        statusBadge.textContent = "🎙️ Dinliyor";
+        setActiveVisual(true);
+        addLog("sys", "Konuşmanız bekleniyor...");
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        handleCommand(transcript);
+      };
+
+      recognition.onerror = (event) => {
+        const messages = {
+          "not-allowed": "Mikrofon izni verilmedi. Tarayıcı adres çubuğundan izin verip tekrar deneyin.",
+          "audio-capture": "Kullanılabilir bir mikrofon bulunamadı.",
+          "network": "Ses tanıma için ağ bağlantısı gerekiyor.",
+          "no-speech": "Konuşma algılanmadı. Tekrar deneyin."
+        };
+        addLog("sys", messages[event.error] || `Ses algılanamadı (${event.error}). Yazılı komutu da kullanabilirsiniz.`);
+      };
+
+      recognition.onend = () => {
+        isListening = false;
+        runBtn.textContent = "▶ Çalıştır / Dinle";
+        runBtn.classList.remove("listening");
+        micBtn.textContent = "🎤 Mikrofonu Aç";
+        statusBadge.textContent = timerEndAt ? getRemainingBadge() : "";
+        setActiveVisual(false);
+      };
+    } else {
+      addLog("sys", "Bilgi: Tarayıcı ses tanıma kısıtlı; alttaki komut kutusunu kullanabilirsiniz.");
+    }
+
+    function toggleListening() {
+      if (!recognition) {
+        addLog("sys", "Mikrofon bu tarayıcıda desteklenmiyor. Aşağıdan komut yazın.");
+        return;
+      }
+      if (isListening) recognition.stop();
+      else {
+        try { recognition.start(); } catch (e) { recognition.stop(); }
+      }
+    }
+
+    runBtn.addEventListener("click", toggleListening);
+    micBtn.addEventListener("click", toggleListening);
+    greetBtn.addEventListener("click", dailyBriefing);
+    timerBtn.addEventListener("click", () => startTimerMinutes(25));
+    autobotBtn.addEventListener("click", triggerAutobotCall);
+
+    cmdForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (!cmdInput.value.trim()) return;
+      handleCommand(cmdInput.value);
+      cmdInput.value = "";
+    });
+  </script>
+</body>
+</html>
