@@ -1,4 +1,4 @@
-const CACHE_NAME = "optimus-asistan-v2";
+const CACHE_NAME = "optimus-asistan-v3982404";
 const APP_FILES = [
   "./",
   "./index.html",

@@ -8,8 +8,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Optimus Asistan" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <link rel="manifest" href="./manifest.webmanifest" />
-  <link rel="apple-touch-icon" href="./icon-180.png" />
+  <link rel="manifest" href="./manifest.webmanifest?v=3982404" />
+  <link rel="apple-touch-icon" href="./icon-180.png?v=3982404" />
   <title>OPTIMUS PRIME TR // GÜNLÜK KOMUTA ASİSTANI</title>
   <style>
     * {
@@ -919,7 +919,7 @@
 
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js").catch(() => {});
+        navigator.serviceWorker.register("./sw.js?v=3982404").catch(() => {});
       });
     }
   </script>
