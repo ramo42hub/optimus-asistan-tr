@@ -480,6 +480,7 @@
     <button id="greetBtn" class="task-btn" type="button" style="background:rgba(147,51,234,0.25);border:1px solid rgba(192,132,252,0.55);color:#f3e8ff;">Günlük Özet</button>
     <button id="timerBtn" class="task-btn" type="button" style="background:rgba(16,185,129,0.22);border:1px solid rgba(52,211,153,0.55);color:#d1fae5;">⏱ 25dk Odak</button>
     <button id="autobotBtn" class="task-btn" type="button" style="background:rgba(2,132,199,0.25);border:1px solid rgba(56,189,248,0.55);color:#e0f2fe;">🛡 Autobot Çağrısı</button>
+    <button id="soundTestBtn" class="task-btn" type="button" style="background:rgba(234,179,8,0.22);border:1px solid rgba(250,204,21,0.55);color:#fef9c3;">🔊 Ses Testi</button>
     <button id="micBtn" class="task-btn" type="button" style="background:rgba(14,165,233,0.28);border:1px solid #38bdf8;color:#ffffff;">🎤 Mikrofonu Aç</button>
   </div>
 
@@ -493,6 +494,7 @@
     const greetBtn = document.getElementById("greetBtn");
     const timerBtn = document.getElementById("timerBtn");
     const autobotBtn = document.getElementById("autobotBtn");
+    const soundTestBtn = document.getElementById("soundTestBtn");
     const statusBadge = document.getElementById("statusBadge");
     const primeSvg = document.getElementById("primeSvg");
     const faceTriangle = document.getElementById("faceTriangle");
@@ -586,11 +588,33 @@
       return trVoices.find(v => /tolga|mehmet|ahmet|male|erkek|google/i.test(v.name)) || trVoices[0];
     }
 
-    function speakPrime(text) {
-      addLog("bot", "OPTIMUS PRIME: " + text);
+    function unlockSpeech() {
       if (!("speechSynthesis" in window)) return;
       try {
+        window.speechSynthesis.resume();
+        const unlock = new SpeechSynthesisUtterance("");
+        unlock.volume = 0;
+        window.speechSynthesis.speak(unlock);
+      } catch (e) {}
+    }
+
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.getVoices();
+      window.speechSynthesis.addEventListener("voiceschanged", () => {
+        window.speechSynthesis.getVoices();
+      });
+    }
+
+    function speakPrime(text) {
+      addLog("bot", "OPTIMUS PRIME: " + text);
+      if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
+        statusBadge.textContent = "Ses desteklenmiyor";
+        addLog("sys", "Bu tarayıcı konuşmayı desteklemiyor. Chrome veya Safari kullanın.");
+        return;
+      }
+      try {
         window.speechSynthesis.cancel();
+        window.speechSynthesis.resume();
         const utter = new SpeechSynthesisUtterance(text);
         utter.lang = "tr-TR";
         utter.pitch = 0.38;
@@ -605,14 +629,22 @@
           setActiveVisual(true);
           startBass();
         };
-        utter.onend = utter.onerror = () => {
+        utter.onend = () => {
           statusBadge.textContent = timerEndAt ? getRemainingBadge() : "";
           setActiveVisual(false);
           stopBass();
         };
+        utter.onerror = (event) => {
+          statusBadge.textContent = "Ses hatası";
+          setActiveVisual(false);
+          stopBass();
+          addLog("sys", `Konuşma oynatılamadı (${event.error || "bilinmeyen hata"}). Telefonun sesini ve sessiz modunu kontrol edin.`);
+        };
 
-        window.speechSynthesis.speak(utter);
-      } catch (e) {}
+        setTimeout(() => window.speechSynthesis.speak(utter), 80);
+      } catch (e) {
+        statusBadge.textContent = "Ses başlatılamadı";
+      }
     }
 
     function getRemainingBadge() {
@@ -830,15 +862,20 @@
       }
     }
 
-    runBtn.addEventListener("click", toggleListening);
-    micBtn.addEventListener("click", toggleListening);
-    greetBtn.addEventListener("click", dailyBriefing);
-    timerBtn.addEventListener("click", () => startTimerMinutes(25));
-    autobotBtn.addEventListener("click", triggerAutobotCall);
+    runBtn.addEventListener("click", () => { unlockSpeech(); toggleListening(); });
+    micBtn.addEventListener("click", () => { unlockSpeech(); toggleListening(); });
+    greetBtn.addEventListener("click", () => { unlockSpeech(); dailyBriefing(); });
+    timerBtn.addEventListener("click", () => { unlockSpeech(); startTimerMinutes(25); });
+    autobotBtn.addEventListener("click", () => { unlockSpeech(); triggerAutobotCall(); });
+    soundTestBtn.addEventListener("click", () => {
+      unlockSpeech();
+      speakPrime("Ses testi başarılı. Optimus Prime hazır.");
+    });
 
     cmdForm.addEventListener("submit", (e) => {
       e.preventDefault();
       if (!cmdInput.value.trim()) return;
+      unlockSpeech();
       handleCommand(cmdInput.value);
       cmdInput.value = "";
     });
